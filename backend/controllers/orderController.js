@@ -42,6 +42,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     }
 });
 
+
 // @desc Get logged in user orders
 // @route GET /api/orders/myorders
 // @access Private
@@ -49,6 +50,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
     const orders = await Order.find({ user: req.user._id });
     res.status(200).json(orders)
 });
+
 
 // @desc Get Order by ID
 // @route GET /api/orders/:id
@@ -64,66 +66,84 @@ const getOrderById = asyncHandler(async (req, res) => {
     };
 });
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// @desc Generate Stripe Payment Intent
+
+// @desc Create Stripe Payment Intent
 // @route POST /api/config/stripe
 // @access Private
-const generateStripeToken  = asyncHandler(async (req, res) => {
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: req.body.amount, // Amount should be in cents
-        currency: 'sek', 
-    });
+const createStripePaymentIntent = asyncHandler(async (req, res) => {
+    // Step 1: Retrieve the most recent order for the user
+    const order = await Order.findOne({ user: req.user._id }).sort({ createdAt: -1 });
+    if (!order) {
+        res.status(404);
+        throw new Error('No recent orders found for this user');
+    }
 
-    res.status(200).send({
-        clientSecret: paymentIntent.client_secret
-    })
-})
+    // Step 2: Calculate the total amount from the retrieved order's items
+    const totalAmount = order.orderItems.reduce((acc, item) => acc + (item.price * 100), 0); // Multiply by 100 to convert to cents
 
+    // Step 3: Create the payment intent
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: totalAmount,
+            currency: 'sek',
+            automatic_payment_methods: { enabled: true },
+            description: `Payment for order ${order._id}`,  // changed to use the actual order ID
+            metadata: { order_id: order._id.toString() },
+            receipt_email: req.user.email
+        });
 
-// @desc Send Stripe API Key
-// @route GET /api/config/stripe/key
-// @access Private
-const sendStripeAPIKey = asyncHandler(async (req, res) => {
-    console.log("STRIPE_PUBLIC_KEY:", process.env.STRIPE_PUBLIC_KEY);
-
-    res.status(200).send({
-        stripeAPIKey: process.env.STRIPE_PUBLIC_KEY
-        // stripeAPIKey: ""
-    });
+        res.status(200).send({
+            clientSecret: paymentIntent.client_secret
+        });
+    } catch (error) {
+        res.status(400).send({ error: `Stripe payment intent failed: ${error.message}` });
+    }
 });
+
 
 
 // @desc Update order to paid
 // @route PUT /api/orders/:id/pay
 // @access Private
 const updateOrderToPaid = asyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id)
+    const order = await Order.findById(req.params.id);
     
     if (order) {
-        order.isPaid = true;
-        order.paidAt = Date.now();
-        order.paymentResult = {
-            id: req.body.id,
-            status: req.body.status,
-            update_time: req.body.update_time,
-            email_address: req.body.payer.email_address
-        };
-        const updatedOrder = await order.save();
+        try {
+            // Use updateOne method for direct database update
+            await Order.updateOne({ _id: req.params.id }, { $set: { 
+                isPaid: true, 
+                paidAt: Date.now(), 
+                paymentResults: {
+                    id: req.body.id,
+                    status: req.body.status,
+                    update_time: req.body.update_time,
+                    email_address: req.body.email_address
+                } 
+            }});
 
-        res.status(200).json(updatedOrder)
+            // Fetch the updated order to send as a response
+            const updatedOrder = await Order.findById(req.params.id);
+            res.status(200).json(updatedOrder);
+        } catch (error) {
+            res.status(500).send('Server Error');
+        }
     } else {
         res.status(404);
-        throw new Error("Order not Found")
     }
 });
 
-// @desc Update order to delivered
-// @route PUT /api/orders/:id/delivered
-// @access Private
+
+
+// // @desc Update order to delivered
+// // @route PUT /api/orders/:id/delivered
+// // @access Private
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
     res.send('update Order to delivered');
 });
+
 
 
 // @desc Create new orders
@@ -133,14 +153,13 @@ const getOrders = asyncHandler(async (req, res) => {
     res.send('get all orders');
 });
 
+
 export {
     addOrderItems,
     getOrders,
     getMyOrders,
     getOrderById,
+    createStripePaymentIntent,
     updateOrderToPaid,
     updateOrderToDelivered,
-    generateStripeToken,
-    sendStripeAPIKey
 }
-

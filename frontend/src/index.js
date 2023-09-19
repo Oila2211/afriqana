@@ -35,7 +35,6 @@ const router = createBrowserRouter(
       <Route path='/cart' element={<CartScreen />} />
       <Route path='/login' element={<LoginScreen />} />
       <Route path='/register' element={<RegisterScreen />} />
-      <Route path='/register' element={<RegisterScreen />} />
 
       <Route path='' element={<PrivateRoute />}>
         <Route path='/delivery' element={<DeliveryScreen />} />
@@ -50,7 +49,7 @@ const router = createBrowserRouter(
   )
 )
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY)
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

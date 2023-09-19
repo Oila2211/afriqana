@@ -15,50 +15,18 @@ import {
   extractAllowedOptionsUpdates,
   UnknownOptions,
 } from '../utils/extractAllowedOptionsUpdates';
-import {isStripe, isPromise} from '../utils/guards';
+import {parseStripeProp} from '../utils/parseStripeProp';
+import {registerWithStripeJs} from '../utils/registerWithStripeJs';
+import {useElementsOrCustomCheckoutSdkContextWithUseCase} from './CustomCheckout';
 
-const INVALID_STRIPE_ERROR =
-  'Invalid prop `stripe` supplied to `Elements`. We recommend using the `loadStripe` utility from `@stripe/stripe-js`. See https://stripe.com/docs/stripe-js/react#elements-props-stripe for details.';
-
-// We are using types to enforce the `stripe` prop in this lib, but in a real
-// integration `stripe` could be anything, so we need to do some sanity
-// validation to prevent type errors.
-const validateStripe = (maybeStripe: unknown): null | stripeJs.Stripe => {
-  if (maybeStripe === null || isStripe(maybeStripe)) {
-    return maybeStripe;
-  }
-
-  throw new Error(INVALID_STRIPE_ERROR);
-};
-
-type ParsedStripeProp =
-  | {tag: 'empty'}
-  | {tag: 'sync'; stripe: stripeJs.Stripe}
-  | {tag: 'async'; stripePromise: Promise<stripeJs.Stripe | null>};
-
-const parseStripeProp = (raw: unknown): ParsedStripeProp => {
-  if (isPromise(raw)) {
-    return {
-      tag: 'async',
-      stripePromise: Promise.resolve(raw).then(validateStripe),
-    };
-  }
-
-  const stripe = validateStripe(raw);
-
-  if (stripe === null) {
-    return {tag: 'empty'};
-  }
-
-  return {tag: 'sync', stripe};
-};
-
-interface ElementsContextValue {
+export interface ElementsContextValue {
   elements: stripeJs.StripeElements | null;
   stripe: stripeJs.Stripe | null;
 }
 
-const ElementsContext = React.createContext<ElementsContextValue | null>(null);
+export const ElementsContext = React.createContext<ElementsContextValue | null>(
+  null
+);
 ElementsContext.displayName = 'ElementsContext';
 
 export const parseElementsContext = (
@@ -220,23 +188,7 @@ export const Elements: FunctionComponent<PropsWithChildren<ElementsProps>> = (({
 
   // Attach react-stripe-js version to stripe.js instance
   React.useEffect(() => {
-    const anyStripe: any = ctx.stripe;
-
-    if (
-      !anyStripe ||
-      !anyStripe._registerWrapper ||
-      !anyStripe.registerAppInfo
-    ) {
-      return;
-    }
-
-    anyStripe._registerWrapper({name: 'react-stripe-js', version: _VERSION});
-
-    anyStripe.registerAppInfo({
-      name: 'react-stripe-js',
-      version: _VERSION,
-      url: 'https://stripe.com/docs/stripe-js/react',
-    });
+    registerWithStripeJs(ctx.stripe);
   }, [ctx.stripe]);
 
   return (
@@ -262,10 +214,21 @@ export const useElementsContextWithUseCase = (
   return parseElementsContext(ctx, useCaseMessage);
 };
 
+const DUMMY_CART_ELEMENT_CONTEXT: CartElementContextValue = {
+  cart: null,
+  cartState: null,
+  setCart: () => {},
+  setCartState: () => {},
+};
+
 export const useCartElementContextWithUseCase = (
-  useCaseMessage: string
+  useCaseMessage: string,
+  isInCustomCheckout = false
 ): CartElementContextValue => {
   const ctx = React.useContext(CartElementContext);
+  if (isInCustomCheckout) {
+    return DUMMY_CART_ELEMENT_CONTEXT;
+  }
   return parseCartElementContext(ctx, useCaseMessage);
 };
 
@@ -281,7 +244,9 @@ export const useElements = (): stripeJs.StripeElements | null => {
  * @docs https://stripe.com/docs/stripe-js/react#usestripe-hook
  */
 export const useStripe = (): stripeJs.Stripe | null => {
-  const {stripe} = useElementsContextWithUseCase('calls useStripe()');
+  const {stripe} = useElementsOrCustomCheckoutSdkContextWithUseCase(
+    'calls useStripe()'
+  );
   return stripe;
 };
 
