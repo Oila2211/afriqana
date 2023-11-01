@@ -1,7 +1,7 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Order from "../models/orderModels.js";
+import User from "../models/userModel.js";
 import Stripe from "stripe";
-import generateToken from "../utils/generateToken.js";
 
 // @desc Create new orders
 // @route POST /api/orders
@@ -18,7 +18,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     } = req.body;
 
     if (orderItems && orderItems.length === 0) {
-        res.status(400);
+        res.status(400).json({ error: 'No order items'});
         throw new Error ('No order items')
     } else {
         const order = new Order ({
@@ -38,7 +38,10 @@ const addOrderItems = asyncHandler(async (req, res) => {
 
         const createdOrder = await order.save();
 
-        res.status(201).json(createdOrder)
+        // Calculate Qana points based on totalPrice (1 Qana for every 1 SEK)
+        const potentialQanaPoints = totalPrice;
+
+        res.status(201).json({createdOrder, potentialQanaPoints})
     }
 });
 
@@ -88,10 +91,10 @@ const createStripePaymentIntent = asyncHandler(async (req, res) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: totalAmount,
             currency: 'sek',
-            automatic_payment_methods: { enabled: true },
+            payment_method_types:['card', 'klarna'],
             description: `Payment for order ${order._id}`,  // changed to use the actual order ID
             metadata: { order_id: order._id.toString() },
-            receipt_email: req.user.email
+            // receipt_email: req.user.email
         });
 
         res.status(200).send({
@@ -109,6 +112,11 @@ const createStripePaymentIntent = asyncHandler(async (req, res) => {
 // @access Private
 const updateOrderToPaid = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
+    const { id, status, update_time, email_address } = req.body;
+    if (!id || !status || !update_time || !email_address) {
+        return res.status(400).send('Missing required fields in request body.');
+    }
+
     
     if (order) {
         try {
@@ -124,14 +132,41 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
                 } 
             }});
 
+            // Fetch the user associated with the order
+            const user = await User.findById(order.user);
+            
+
+            if (user ) {
+                // Deducting redeeemed Qana points if any
+                if(order.redeemedPoints) {
+                    user.qanaPoints = user.qanaPoints - order.redeemedPoints;
+                }
+
+                //Add the Qana points based on the order's totalPrice
+                user.qanaPoints = user.qanaPoints + order.totalPrice;
+                await user.save();
+                console.log("my qana points:", user.qanaPoints)
+            }
+
+            console.log(user)
+            
+
             // Fetch the updated order to send as a response
             const updatedOrder = await Order.findById(req.params.id);
-            res.status(200).json(updatedOrder);
+            if(updatedOrder) {
+                res.status(200).json({
+                  updatedOrder: updatedOrder,
+                  updatedUser: user,
+                });
+            } else {
+                res.status(500).send('Failed to fetch updated order');
+            }
         } catch (error) {
+            console.error(`Error in updating order ${req.params.id} to paid:`, error.message);
             res.status(500).send('Server Error');
         }
     } else {
-        res.status(404);
+        res.status(404).json({ error: 'Order not found'});
     }
 });
 
@@ -139,18 +174,30 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
 // // @desc Update order to delivered
 // // @route PUT /api/orders/:id/delivered
-// // @access Private
+// // @access Private/Admin
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
-    res.send('update Order to delivered');
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+        order.isDelivered = true;
+        order.deliveredAt = Date.now();
+
+        const updatedOrder = await order.save();
+        res.status(200).json(updatedOrder)
+    } else {
+        res.status(404);
+        throw new Error("Order not found")
+    }
 });
 
 
 
-// @desc Create new orders
-// @route POST /api/orders
+// @desc Get all orders
+// @route GET /api/orders
 // @access Private/Admin
 const getOrders = asyncHandler(async (req, res) => {
-    res.send('get all orders');
+    const orders = await Order.find({}).populate('user', 'id name') 
+    res.status(200).json(orders);
 });
 
 

@@ -47,12 +47,16 @@ const orderSchema = mongoose.Schema({
     deliveryPrice: {
         type: Number,
         required: true,
-        default: 0.0,
+        default: 60.0,
     },
     totalPrice: {
         type: Number,
         required: true,
         default: false,
+    },
+    redeemedPoints: {
+        type: Number,
+        default: 0,
     },
     isPaid: {
         type: Boolean,
@@ -77,4 +81,4 @@ const orderSchema = mongoose.Schema({
 
 const Order = mongoose.model("Order", orderSchema);
 
-export default Order;
+export default Order;  

@@ -26,10 +26,48 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 credentials: 'include',
             }),
         }),
-            // keepUnusedDataFor: 5
+        profile: builder.mutation({
+            query: (data) => ({
+                url: `${USERS_URL}/profile`,
+                method: 'PUT',
+                body: data,
+                credentials: 'include',
+                
+            }),
+            providesTags: ['User'],
+            keepUnusedDataFor: 5,
+        }),
+        redeemPoints: builder.mutation({
+            query: (data) => ({
+                url: `${USERS_URL}/redeem`,
+                method: 'POST',
+                body: data,
+                credentials: 'include'
+            }),
+            invalidatesTags: ['User'],
+            providesTags: ['User'],
+            keepUnusedDataFor: 5,
+        }),
+        currentUserDetails: builder.query({
+            query: () => ({
+                url: `${USERS_URL}/profile`,
+                method: 'GET',
+                credentials: 'include',
+            }),
+            providesTags: ['User'],
+            keepUnusedDataFor: 5,  
+        }),
+        getUsers: builder.query({
+            query: () => ({
+                url: USERS_URL,
+                credentials: 'include',
+            }),
+            providesTags: ['Users'],
+            keepUnusedDataFor: 5,  
+        })
     }),
         
 })
 
 
-export const { useLogoutMutation, useLoginMutation, useRegisterMutation } = usersApiSlice;
+export const { useLogoutMutation, useLoginMutation, useRegisterMutation, useProfileMutation, useRedeemPointsMutation, useCurrentUserDetailsQuery, useGetUsersQuery } = usersApiSlice;

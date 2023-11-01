@@ -11,7 +11,6 @@ import { clearCartItems } from '../slices/cartSlice';
 
 const PlaceOrderScreens = () => {
   const navigate = useNavigate();
-  
   const cart = useSelector((state) => state.cart);
 
   const [createOrder, {isLoading, error}] = useCreateOrderMutation();
@@ -38,7 +37,11 @@ const PlaceOrderScreens = () => {
         totalPrice: cart.totalPrice
       }).unwrap();
       dispatch(clearCartItems());
-      navigate(`/order/${res._id}`)
+      if (res && res.createdOrder && res.createdOrder._id) {
+         navigate(`/redeem-points/${res.createdOrder._id}`);
+      } else {
+        toast.error("Order ID not found in the response")
+      }
     } catch (err) {
       toast.error(err)
     }

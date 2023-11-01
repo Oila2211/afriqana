@@ -23,7 +23,7 @@ const DeliveryScreen = () => {
         dispatch(saveDeliveryAddress({
             address, phoneNumber
         }));
-        navigate('/payment')
+        navigate('/placeorder')
     };
 
   return (

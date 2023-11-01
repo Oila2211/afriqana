@@ -28,9 +28,12 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.1",
+    "klarna-node": "^0.1.2",
     "mongoose": "^7.4.2",
-    "stripe": "^13.4.0"
+    "multer": "^1.4.5-lts.1",
+    "stripe": "^13.7.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

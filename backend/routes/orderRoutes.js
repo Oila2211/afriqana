@@ -7,7 +7,7 @@ import {
     getOrderById,
     updateOrderToPaid,
     updateOrderToDelivered,
-    createStripePaymentIntent
+    createStripePaymentIntent,
 } from "../controllers/orderController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 

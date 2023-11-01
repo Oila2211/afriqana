@@ -6,14 +6,16 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import { Outlet } from 'react-router-dom';
 
+
 const App = () => {
+
   return (
     <>
     <Header />
     <main>
-      <Container>
-        <Outlet />
-      </Container>
+        <Container>
+          <Outlet />
+        </Container>
     </main>
     <Footer />
     <ToastContainer/>

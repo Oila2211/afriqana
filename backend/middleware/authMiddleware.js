@@ -5,7 +5,7 @@ import User from "../models/userModel.js";
 // User must be authorized
 const protect = asyncHandler(async (req, res, next) => {
     let token;
-
+    
     // Read the JWT from the code
     token = req.cookies.jwt;
 
@@ -13,6 +13,7 @@ const protect = asyncHandler(async (req, res, next) => {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             req.user = await User.findById(decoded.userId).select('-password');
+            
             next();
         } catch (error) {
             console.error(error);
