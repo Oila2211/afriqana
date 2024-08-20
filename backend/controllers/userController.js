@@ -85,7 +85,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 // // @route POST /api/users/redeem
 // //@access Private
 const redeemQanaPoints = asyncHandler(async (req, res) => {
-    const { points, orderId, redeemOption} = req.body;
+    const { points, orderId} = req.body;
     const user = await User.findById(req.user._id)
 
     if (!user) {
@@ -99,11 +99,6 @@ const redeemQanaPoints = asyncHandler(async (req, res) => {
         throw new Error('Error: You need at least 2,000 Qana points to redeem.')
     }
 
-    // Check if the user has enough points to match the redemption amount
-    if (user.qanaPoints < points) {
-        res.status(400);
-        throw new Error('Error: Not enough Qana points to redeem this offer.')
-    }
 
     const order = await Order.findById(orderId);
 
@@ -113,15 +108,22 @@ const redeemQanaPoints = asyncHandler(async (req, res) => {
         throw new Error('Order not found')
     }
 
+    // Check if points have already been redeemed for this order
+    if (order.redeemedPoints > 0) {
+        res.status(400);
+        throw new Error('Points have already been redeemed for this order.');
+    }
+
+    // Check if the user has enough points to match the redemption amount
+    if (user.qanaPoints < points) {
+        res.status(400);
+        throw new Error('Error: Not enough Qana points to redeem this offer.')
+    }
+
     // Apply the corresponding offer or discount
-    if (points === 2000 && order.totalPrice >= 350) {
-        if (redeemOption === '50-discount') {
+    if (points === 2000 && order.totalPrice >= 350) {    
             order.totalPrice -= 50; // SEK 50 discount
             order.redeemedPoints = points;
-        } else if (redeemOption === 'free-shipping') {
-            order.deliveryPrice = 0; // Free Delivery
-            order.redeemedPoints = points;
-        }
     } else {
         res.status(400);
         throw new Error('Conditions not met for redemption.');
@@ -130,7 +132,15 @@ const redeemQanaPoints = asyncHandler(async (req, res) => {
     await order.save();
 
 
-    res.status(200).json({ message: 'Redemption successful' })
+    res.status(200).json({ 
+        message: 'Redemption successful',
+        orderPrices: {
+            itemsPrice: order.itemsPrice,
+            deliveryPrice: order.deliveryPrice,
+            taxPrice: order.taxPrice,
+            totalPrice: order.totalPrice
+        }
+     });
 })
 
 

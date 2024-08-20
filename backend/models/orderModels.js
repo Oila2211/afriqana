@@ -22,7 +22,12 @@ const orderSchema = mongoose.Schema({
         }
     ],
     deliveryAddress: {
-        address: { type: String, required: true}
+        address: { type: String, required: true},
+        floorAndDoor: { type: String, required: false},
+    },
+    phoneNumber: {
+        type: String,
+        required: true,
     },
     paymentMethod: {
         type: String,
@@ -47,7 +52,7 @@ const orderSchema = mongoose.Schema({
     deliveryPrice: {
         type: Number,
         required: true,
-        default: 60.0,
+        default: 0.0,
     },
     totalPrice: {
         type: Number,

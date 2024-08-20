@@ -75,6 +75,7 @@ const CouponListScreen = () => {
                 <th>Coupon Code</th>
                 <th> % Discount</th>
                 <th>Expiry date</th>
+                <th>Limit per User</th>
                 <th>Is Active</th>
               </tr>
             </thead>
@@ -86,6 +87,7 @@ const CouponListScreen = () => {
                   <td>{coupon.code}</td>
                   <td>{coupon.discountPercentage}</td>
                   <td>{coupon.expiryDate}</td>
+                  <td>{coupon.limitPerUser}</td>
                   <td>
                     {coupon.isActive ? (
                     <FaCheck style={{ color: 'green'}}/>

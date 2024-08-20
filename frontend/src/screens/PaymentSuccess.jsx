@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { updateUserInfoAfterPayment } from '../slices/authSlice';
 import { useGetOrderDetailsQuery, usePayOrderMutation } from '../slices/ordersApiSlice';
+import { resetOrderValues } from '../slices/orderSlice';
 import { toast } from 'react-toastify';
 import { useStripePromise } from '../contexts/StripeContext';
 
 const PaymentSuccess = () => {
-    const { id: orderId } = useParams()
+
+    const orderId = useSelector((state) => state.order.orderId);  // Use Redux state for orderId
+    const dispatch = useDispatch();
     
     const { data: order, refetch, isError, isLoading } = useGetOrderDetailsQuery(orderId);
     const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
@@ -37,12 +41,16 @@ const PaymentSuccess = () => {
               await payOrder({ orderId, details});
               // markAsPaid(orderId)
               toast.success('Order is Paid')
+
+              // Reset orderId after successful payment
+              dispatch(resetOrderValues());
+              // dispatch(resetOrderId())
           } 
           refetch()
     
         fetchPaymentIntent();
         
-    }, [stripe, payOrder, refetch, orderId]);
+    }, [stripe, payOrder, refetch, orderId, dispatch]);
 
       
 

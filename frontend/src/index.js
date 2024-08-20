@@ -21,7 +21,6 @@ import CartScreen from './screens/CartScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import DeliveryScreen from './screens/DeliveryScreen';
-import RedeemPointsScreen from './screens/RedeemPointsScreen';
 import PlaceOrderScreen from './screens/PlaceOrderScreen';
 import OrderScreen from './screens/OrderScreen';
 import PaymentSuccess from './screens/PaymentSuccess';
@@ -49,7 +48,6 @@ const router = createBrowserRouter(
         <Route path='/delivery' element={<DeliveryScreen />} />
         {/* <Route path='/payment' element={<PaymentScreen />} /> */}
         <Route path='/placeorder' element={<PlaceOrderScreen />} />
-        <Route path='/redeem-points/:id' element={<RedeemPointsScreen />}/>
         <Route path='/order/:id' element={<OrderScreen />} />
         <Route path='/payment-success/:id' element={<PaymentSuccess />} />
         <Route path='/profile' element={<ProfileScreen />} />  

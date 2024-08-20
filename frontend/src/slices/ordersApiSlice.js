@@ -3,6 +3,14 @@ import { ORDERS_URL, STRIPE_URL } from '../constants';
 
 export const ordersApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
+        calculateDeliveryPrice: builder.mutation({
+            query: (deliveryAddress) => ({
+                url: `${ORDERS_URL}/calculate-delivery`,
+                method: 'POST',
+                credentials: 'include',
+                body: {deliveryAddress},
+            }),
+        }),
         createOrder: builder.mutation({
             query: (order) => ({
                 url: ORDERS_URL,
@@ -62,6 +70,7 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
 });
 
 export const { 
+  useCalculateDeliveryPriceMutation,
   useCreateOrderMutation, 
   useGetOrderDetailsQuery, 
   usePayOrderMutation, 

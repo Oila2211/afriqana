@@ -28,6 +28,11 @@ const couponSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+    limitPerUser: {
+        type: Number,
+        required: true,
+        default: 1,
+    },
     isActive: {
         type: Boolean,
         require: true,

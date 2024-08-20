@@ -11,6 +11,7 @@ const CouponEditScreen = () => {
   const {id: couponId} = useParams();
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [expiryDate, setExpiryDate] = useState();
+  const [limitPerUser, setLimitPerUser] = useState(1);
   const [isActive, setIsActive] = useState(0);
 
   const { data: coupon, isLoading, refetch, error} = useGetCouponDetailsQuery(couponId);
@@ -27,6 +28,7 @@ const CouponEditScreen = () => {
         couponId,
         discountPercentage,
         expiryDate,
+        limitPerUser,
         isActive,
       }).unwrap(); // Note: here we need to unwrap the promise to catch any rejections;
       toast.success('Coupon updated');
@@ -41,6 +43,7 @@ const CouponEditScreen = () => {
     if(coupon) {
       setDiscountPercentage(coupon.discountPercentage)
       setExpiryDate(coupon.ExpiryDate)
+      setLimitPerUser(coupon.limitPerUser)
       setIsActive(coupon.isActive)
     }
   }, [coupon])
@@ -75,6 +78,16 @@ const CouponEditScreen = () => {
                 type='date'
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Limit Per User</Form.Label>
+              <Form.Control
+                type='number'
+                placeholder='Enter user limit'
+                value={limitPerUser}
+                onChange={(e) => setLimitPerUser(e.target.value)}
               ></Form.Control>
             </Form.Group>
 

@@ -19,10 +19,6 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 50,
     },
-    // pendingRedeemPoints: {
-    //     type: Number,
-    //     default: 0,
-    // },
     isAdmin: {
         type: Boolean,
         required: false,

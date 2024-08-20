@@ -8,8 +8,7 @@ import { updateUserInfoAfterPayment } from '../slices/authSlice';
 import { useStripePromise } from '../contexts/StripeContext';
 import { usePayOrderMutation, useGetOrderDetailsQuery } from '../slices/ordersApiSlice';
 import { useCurrentUserDetailsQuery } from '../slices/usersApiSlice';
-import PaymentModal from './PaymentModal';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 const PaymentElementScreen = ({ clientSecret ,markAsPaid }) => {
@@ -17,14 +16,20 @@ const PaymentElementScreen = ({ clientSecret ,markAsPaid }) => {
   const  stripe  = useStripePromise();
   const elements = useElements();
   const dispatch = useDispatch();
+
+  // Extract couponCode from redux
+  const couponCode = useSelector((state) => state.order.couponCode); 
+
   const { data: order, isError, isLoading } = useGetOrderDetailsQuery(orderId);
   const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
+
   // Destructure the refetch function for the user's details
   const { data: currentUser, refetch: refetchUser } = useCurrentUserDetailsQuery();
 
 
   const [processing, setProcessing] = useState(false);
   const [disabled, setDisabled] = useState(false);
+
   // const [showModal, setShowModal] = useState(false);
   const [refetchResult, setRefetchResult] = useState(null);
 
@@ -50,13 +55,13 @@ const PaymentElementScreen = ({ clientSecret ,markAsPaid }) => {
       }
 };
 
-const handlePayment = async (event) => {
-  event.preventDefault();
-  if (!stripe || !elements) {
-    // Stripe.js hasn't yet loaded.
-    // Make sure to disable form submission until Stripe.js has loaded.
-    return;
-  }
+  const handlePayment = async (event) => {
+    event.preventDefault();
+    if (!stripe || !elements) {
+      // Stripe.js hasn't yet loaded.
+      // Make sure to disable form submission until Stripe.js has loaded.
+      return;
+    }
 
   setProcessing(true);
 
@@ -93,23 +98,23 @@ const handlePayment = async (event) => {
       return;
     }
 
+
     // Assuming paymentIntent.status === 'succeeded'
     const details = {
       id: paymentIntent.id,
       status: paymentIntent.status,
       update_time: new Date().toISOString(),
       email_address: paymentIntent.receipt_email || 'default_email@example.com', // replace with actual email
+      couponCode // Pass couponCode here
     };
   
+    // Include couponCode in the payment payload
     const response = await payOrder({ orderId, details });
     if (response.data.updatedUser) {
       dispatch(updateUserInfoAfterPayment(response.data.updatedUser))
     }
     markAsPaid(orderId);
     await refetchUser();
-    setProcessing(false);
-
-    // const result = await refetchUser();
     toast.success('Order is Paid');
     setProcessing(false);
 
@@ -129,11 +134,6 @@ const handlePayment = async (event) => {
       </Button>
           </div>
       </form>
-      {/* <PaymentModal 
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        amount={"SEK" + order.totalPrice}
-      /> */}
 
     </>
   );

@@ -7,6 +7,7 @@ import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
 import logo from '../assets/Afriqana-logo.jpg';
 import { useDispatch,  useSelector } from 'react-redux';
+import { resetOrderValues  } from '../slices/orderSlice';
 
 const Header = () => {
   const { cartItems } = useSelector((state) => state.cart);
@@ -23,6 +24,8 @@ const Header = () => {
       await logoutApiCall().unwrap();
 
       dispatch(logout());
+      dispatch(resetOrderValues())
+      // dispatch(resetOrderId())
       navigate('/login')
     } catch (error) {
       console.log(error);

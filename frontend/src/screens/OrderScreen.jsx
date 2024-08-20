@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector} from 'react-redux';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { toast } from 'react-toastify';
 import { Elements } from '@stripe/react-stripe-js';
-// import { loadStripe } from '@stripe/stripe-js';
 import PaymentElementScreen from '../components/PaymentElementScreen';
+import ApplyCoupon from '../components/ApplyCoupon';
 import { useStripePromise } from '../contexts/StripeContext';
 import { useGetOrderDetailsQuery, useCreatePaymentIntentMutation, useDeliverOrderMutation } from '../slices/ordersApiSlice';
+import RedeemPoints from '../components/RedeemPoints';
+import { setOrderValues, finalizeOrder, setOrderId } from "../slices/orderSlice";
 
-// const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 const OrderScreen = () => {
 
   const [clientSecret, setClientSecret] = useState('');
   
-  const { id: orderId } = useParams();
+  // Selector to get orderId and orderPricesfrom Redux
+  const orderId = useSelector((state) => state.order.orderId);
+  const orderPrices = useSelector((state) => state.order.orderPrices);
+
   const [hasPaid, setHasPaid] = useState(false);
   const [paymentDate, setPaymentDate] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+
   const stripePromise = useStripePromise()
   const { data: order, refetch, isError, isLoading } = useGetOrderDetailsQuery(orderId);
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
@@ -32,6 +39,21 @@ const OrderScreen = () => {
     setHasPaid(true);
     setPaymentDate(new Date().toISOString());
   };
+
+
+  useEffect(() => {
+    if (!orderId) {
+        // If orderId is not in Redux state, retrieve it from localStorage
+        const storedOrderId = localStorage.getItem('orderId');
+        if (storedOrderId) {
+            dispatch(setOrderId(storedOrderId));
+        } else {
+            toast.error('Order ID not found. Redirecting to home.');
+            navigate('/');
+        }
+    }
+  }, [orderId, dispatch, navigate]);
+
 
   useEffect(() => {
     console.log("my stripe promise is:", stripePromise)
@@ -46,6 +68,24 @@ const OrderScreen = () => {
         });
     }
   }, [order, createPaymentIntent]);
+
+  useEffect(() => {
+    // Set initial values when the component mounts
+    if (order) {
+        dispatch(setOrderValues({
+        itemsPrice: order.itemsPrice,
+        deliveryPrice: order.deliveryPrice,
+        taxPrice: order.taxPrice,
+        totalPrice: order.totalPrice,
+        discountAmount: 0,
+        isFinalized: false,
+        } 
+        ));
+    } 
+  }, [orderId, dispatch]);
+  
+  
+
 
   const deliverOrderHandler = async () => {
     try {
@@ -74,20 +114,17 @@ const OrderScreen = () => {
   return (
     <>
 
-    <h1>Order {order._id}</h1>
+    <h2>Order {order._id}</h2>
     <Row>
         <Col md={8}>
             <ListGroup>
                 <ListGroup.Item>
-                    <h2>Delivery</h2>
+                    <h3>Delivery</h3>
                     <p>
                         <strong>Name:</strong> {order.user.name}
                     </p>
                     <p>
                         <strong>Email:</strong> {order.user.email}
-                    </p>
-                    <p>
-                        <strong>Qana:</strong> {order.user.qanaPoints}
                     </p>
                     <p>
                         <strong>Address:</strong> {order.deliveryAddress.address}
@@ -99,8 +136,10 @@ const OrderScreen = () => {
                     )}
                 </ListGroup.Item>
 
+                <RedeemPoints />
+
                 <ListGroup.Item>
-                    <h2>Payment Status</h2>
+                    <h3>Payment Status</h3>
                     {/* <p>
                         <strong>Method:</strong>
                         {order.paymentMethod}
@@ -141,24 +180,29 @@ const OrderScreen = () => {
             <Card>
                 <ListGroup variant="flush">
                     <ListGroup.Item>
-                        <h2>Order Summary</h2>
+                        <h3>Order Summary</h3>
                     </ListGroup.Item>
+
                     <ListGroup.Item>
                         <Row>
                             <Col>Items</Col>
-                            <Col>SEK{order.itemsPrice}</Col>
+                            <Col>SEK{orderPrices.itemsPrice}</Col>
+                        </Row>
+                        <Row>
+                            <Col>Discount</Col>
+                            <Col>SEK{orderPrices.discountAmount}</Col>
                         </Row>
                         <Row>
                             <Col>Delivery</Col>
-                            <Col>SEK{order.deliveryPrice}</Col>
+                            <Col>SEK{orderPrices.deliveryPrice}</Col>
                         </Row>
                         <Row>
                             <Col>Tax</Col>
-                            <Col>SEK{order.taxPrice}</Col>
+                            <Col>SEK{orderPrices.taxPrice}</Col>
                         </Row>
                         <Row>
                             <Col><strong>Total</strong></Col>
-                            <Col>SEK{order.totalPrice}</Col>
+                            <Col>SEK{orderPrices.totalPrice}</Col>
                         </Row>
                     </ListGroup.Item>
                     
@@ -173,6 +217,10 @@ const OrderScreen = () => {
                     )}
 
                     {loadingDeliver && <Loader />}
+
+                    <ListGroup.Item>
+                        <ApplyCoupon />
+                    </ListGroup.Item>
 
                     {userInfo && userInfo.isAdmin && order.isPaid &&
                     !order.isDelivered && (

@@ -6,7 +6,7 @@ import {
     getCouponById,
     updateCoupon,
     deleteCoupon,
-    redeemCoupon
+    validateCoupon
  } from '../controllers/couponController.js';
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -24,9 +24,9 @@ router.route('/:id')
   .put(protect,admin, updateCoupon)
   .delete(protect, admin, deleteCoupon);
 
-// Redeem a coupon
-router.route('/redeem')
-  .post(protect, redeemCoupon)
+// Apply or validate a coupon
+router.route('/apply')
+  .post(protect, validateCoupon)
 
 
   

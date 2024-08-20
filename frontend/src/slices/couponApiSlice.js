@@ -35,6 +35,31 @@ export const couponApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Coupon']
         }),
+        // applyCoupon: builder.mutation({
+        //     query: ({couponCode,}) => ({
+        //         url: `${COUPON_URL}/apply`,
+        //         method: 'POST',
+        //         body: {couponCode},
+        //         credentials: 'include'
+        //     }),
+        //     invalidatesTags: ['Coupon']
+        // }),
+        applyCoupon: builder.mutation({
+            query: ({ couponCode, orderId }) => {
+                // Log the payload to verify structure before sending the request
+                const payload = { couponCode, orderId };
+                console.log("API Slice Payload:", payload);  // Log the payload here
+        
+                return {
+                    url: `${COUPON_URL}/apply`,
+                    method: 'POST',
+                    body: payload,  // Make sure both couponCode and orderId are sent in the request body
+                    credentials: 'include'
+                };
+            },
+            invalidatesTags: ['Coupon']
+        }),
+        
         deleteCoupon: builder.mutation({
             query: (couponId) => ({
                 url: `${COUPON_URL}/${couponId}`,
@@ -51,5 +76,6 @@ export const {
     useGetCouponDetailsQuery,
     useCreateCouponMutation,
     useUpdateCouponMutation,
+    useApplyCouponMutation,
     useDeleteCouponMutation } = couponApiSlice;
 
