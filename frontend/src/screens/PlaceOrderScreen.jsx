@@ -35,6 +35,20 @@ const PlaceOrderScreens = () => {
 
   const placeOrderHandler = async () => {
     try {
+
+      console.log("Order Details:", {
+        orderItems: cart.cartItems,
+        deliveryAddress: cart.deliveryAddress,
+        paymentMethod: cart.paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        deliveryPrice: cart.deliveryPrice,
+        phoneNumber: cart.phoneNumber,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice
+    });
+
+
+
       const res = await createOrder({
         orderItems: cart.cartItems,
         deliveryAddress: cart.deliveryAddress,
@@ -66,7 +80,13 @@ const PlaceOrderScreens = () => {
         toast.error("Order ID not found in the response")
       }
     } catch (err) {
-      toast.error(err)
+        console.log("Error objecr", err);
+        // Checking if error is related to no delivery to the region.
+        if (err.status === 400 && err.data.error == 'Delivery not available for this location') {
+          toast.error('Delivery Not available for this location');
+        } else {
+          toast.error(err?.data?.error || 'Failed to place order. Please try again.')
+      }
     }
   }
 

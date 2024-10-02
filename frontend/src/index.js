@@ -30,8 +30,11 @@ import OrderListScreen from './screens/admin/OrderListScreen';
 import ProductListScreen from './screens/admin/ProductListScreen';
 import ProductEditScreen from './screens/admin/ProductEditScreen';
 import UserListScreen from './screens/admin/UserListScreen';
+import UserEditScreen from './screens/admin/UserEditScreen';
 import CouponEditScreen from './screens/admin/CouponEditScreen';
 import CouponListScreen from './screens/admin/CouponListScreen';
+import RegionEditScreen from './screens/admin/RegionPriceEditScreen';
+import RegionListScreen from './screens/admin/RegionListScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -59,8 +62,11 @@ const router = createBrowserRouter(
         <Route path='/admin/productlist' element={<ProductListScreen />} />
         <Route path='/admin/product/:id/edit' element={<ProductEditScreen />} />
         <Route path='/admin/userlist' element={<UserListScreen />} />
+        <Route path='/admin/user/:id/edit' element={<UserEditScreen />} />
         <Route path='/admin/coupon/:id/edit' element={<CouponEditScreen />} />
         <Route path='/admin/couponlist' element={<CouponListScreen />} />
+        <Route path='/admin/region/:id/edit' element={<RegionEditScreen />} />
+        <Route path='/admin/regionlist' element={<RegionListScreen />} />
       </Route>
 
   </Route>

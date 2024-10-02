@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import {
   useGetProductDetailsQuery,
   useUpdateProductMutation,
-  useUploadProductImageMutation,
+  useUploadProductImageMutation
 } from '../../slices/productsApiSlice';
 
 const ProductEditScreen = () => {

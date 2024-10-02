@@ -220,7 +220,7 @@ const getUserByID = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc Get users
+// @desc Delete user
 // @route Get /api/users/: 
 // @access Private/Admin
 const deleteUser = asyncHandler(async (req, res) => {
@@ -232,12 +232,16 @@ const deleteUser = asyncHandler(async (req, res) => {
         throw new Error ('Cannot delete admin user')
       }
       await User.deleteOne({_id: user._id})
-      res.status(200).json({message: 'User deleted successfully'})
+      res.json(200).json({message: 'User removed'})
     } else {
         res.status(404)
         throw new Error('User not found')
     }
 });
+
+  
+
+
 
 // @desc Update user
 // @route PUT /api/users/:id

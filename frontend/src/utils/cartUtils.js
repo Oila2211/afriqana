@@ -9,19 +9,19 @@ export const updateCart = (state) =>{
 
 
     //calculate delivery price
-    state.deliveryPrice = addDecimals(100);
+    // state.deliveryPrice = addDecimals(100);
 
 
     // calculate tax price (12% tax)
     state.taxPrice = addDecimals(Number((0.12 * state.itemsPrice).toFixed(2)));
 
     //calculate total price
-    state.totalPrice = (
-        Number(state.itemsPrice) +
-        Number(state.deliveryPrice) +
-        Number(state.taxPrice) 
+    // state.totalPrice = (
+    //     Number(state.itemsPrice) +
+    //     Number(state.deliveryPrice) +
+    //     Number(state.taxPrice) 
 
-    ).toFixed(2);
+    // ).toFixed(2);
 
     localStorage.setItem('cart', JSON.stringify(state));
 

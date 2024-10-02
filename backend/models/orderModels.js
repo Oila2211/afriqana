@@ -23,6 +23,8 @@ const orderSchema = mongoose.Schema({
     ],
     deliveryAddress: {
         address: { type: String, required: true},
+        longitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
         floorAndDoor: { type: String, required: false},
     },
     phoneNumber: {

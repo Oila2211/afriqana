@@ -4,5 +4,6 @@ export const USERS_URL ='/api/users';
 export const ORDERS_URL ='/api/orders';
 export const UPLOAD_URL = '/api/upload';
 export const COUPON_URL = '/api/coupon';
+export const REGION_URL = '/api/region';
 export const STRIPE_URL ='/api/orders/config/stripe';
 export const KLARNA_URL='/api/orders/config/klarna';

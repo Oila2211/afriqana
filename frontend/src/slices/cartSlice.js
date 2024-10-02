@@ -38,7 +38,11 @@ const cartSlice = createSlice({
         saveDeliveryAddress: (state, action) => {
             state.deliveryAddress = { 
                ...state.deliveryAddress,
-               ...action.payload, 
+               address: action.payload.address,
+               longitude: action.payload.longitude,
+               latitude: action.payload.latitude,
+
+            //    ...action.payload, 
             };
             state.phoneNumber = action.payload.phoneNumber;
             return updateCart(state);
