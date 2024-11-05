@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies for backend"
+      - cd backend
+      - npm install
+      - echo "Installing dependencies for frontend"
+      - cd ../frontend
+      - npm install
+
+  build:
+    commands:
+      - echo "Building frontend"
+      - npm run build
+      - echo "Copying frontend build to backend public folder"
+      - cp -r build/* ../backend/public
+
+  post_build:
+    commands:
+      - echo "Build and setup complete"

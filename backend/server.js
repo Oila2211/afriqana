@@ -60,9 +60,6 @@ app.use('/api/coupon', couponRoutes);
 const __dirname = path.resolve(); //Set __dirname to current directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// const currentDirectory = path.dirname(new URL(import.meta.url).pathname);
-// app.use('/uploads', express.static(path.join(currentDirectory, 'uploads')));
-
 
 app.use(notFound);
 app.use(errorHandler);
