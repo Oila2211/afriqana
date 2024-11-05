@@ -10,6 +10,7 @@ phases:
       - cd ../frontend
       - npm install
       - echo "Frontend dependencies installed"
+      - ls -la node_modules/.bin # List .bin directory to confirm react-scripts is installed
   pre_build:
     commands:
       - echo "Pre-build phase completed"
@@ -17,6 +18,7 @@ phases:
     commands:
       - echo "Building frontend"
       - cd ../frontend
+      - ls -la # List all files to confirm presence of node_modules and required files
       - npm run build
       - echo "Frontend build complete"
       - cd ../backend
