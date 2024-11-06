@@ -3,13 +3,22 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Starting dependency installation for backend"
+      - echo "Starting installation phase"
+
+      # Check if we are in the right directory for backend
+      - if [ -d "backend" ]; then echo "Backend directory found"; else echo "Backend directory missing"; exit 1; fi
+
+      - echo "Installing backend dependencies"
       - cd backend
       - npm install
       - echo "Backend dependencies installed"
 
-      - echo "Starting dependency installation for frontend"
-      - cd ../frontend
+      # Move back to root before accessing frontend
+      - cd ..
+      - if [ -d "frontend" ]; then echo "Frontend directory found"; else echo "Frontend directory missing"; exit 1; fi
+
+      - echo "Installing frontend dependencies"
+      - cd frontend
       - npm install
       - echo "Frontend dependencies installed"
 
@@ -17,9 +26,14 @@ phases:
     commands:
       - echo "Building frontend"
       - npm run build
+      - echo "Frontend build completed"
 
-      # If you need to copy the frontend build to the backend directory
-      - echo "Moving frontend build files to backend public directory"
+      # Move frontend build files to backend if required
+      - echo "Copying frontend build to backend public folder"
       - cp -r build ../backend/public
-
       - echo "Build and setup complete"
+
+artifacts:
+  files:
+    - backend/**/*
+    - frontend/build/**/*
