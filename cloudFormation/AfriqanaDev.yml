@@ -7,7 +7,7 @@ Resources:
     Properties:
       InstanceType: t2.micro # Free tier eligible
       ImageId: ami-0c55b159cbfafe1f0 # Amazon Linux 2 AMI
-      KeyName: your-key-pair-name # Replace with your key pair name
+      KeyName: AfriqanaKeyPair # Replace with your key pair name
       SecurityGroupIds:
         - !Ref InstanceSecurityGroup
       UserData:
