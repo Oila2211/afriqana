@@ -5,8 +5,8 @@ Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t2.micro # Free tier eligible
-      ImageId: ami-0c55b159cbfafe1f0 # Amazon Linux 2 AMI
+      InstanceType: t3.micro # Free tier eligible
+      ImageId: ami-04b54ebf295fe01d7 # Amazon Linux 2 AMI
       KeyName: AfriqanaKeyPair # Replace with your key pair name
       SecurityGroupIds:
         - !Ref InstanceSecurityGroup
