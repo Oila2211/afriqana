@@ -3,26 +3,23 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Starting backend and frontend installation"
+      - echo "Starting dependency installation for backend"
       - cd backend
       - npm install
       - echo "Backend dependencies installed"
+
+      - echo "Starting dependency installation for frontend"
       - cd ../frontend
       - npm install
       - echo "Frontend dependencies installed"
-      - ls -la node_modules/.bin # List .bin directory to confirm react-scripts is installed
-  pre_build:
-    commands:
-      - echo "Pre-build phase completed"
+
   build:
     commands:
       - echo "Building frontend"
-      - cd ../frontend
-      - ls -la # List all files to confirm presence of node_modules and required files
       - npm run build
-      - echo "Frontend build complete"
-      - cd ../backend
-      - echo "Backend setup is ready"
-  post_build:
-    commands:
+
+      # If you need to copy the frontend build to the backend directory
+      - echo "Moving frontend build files to backend public directory"
+      - cp -r build ../backend/public
+
       - echo "Build and setup complete"
