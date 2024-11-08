@@ -5,33 +5,32 @@ phases:
     commands:
       - echo "Installing backend dependencies"
       - cd backend
-      - rm -rf node_modules # Clear node_modules to ensure a fresh install
+      - rm -rf node_modules # Ensure node_modules is fresh
       - npm install
       - echo "Backend dependencies installed"
 
       - cd ..
       - echo "Installing frontend dependencies"
       - cd frontend
-      - rm -rf node_modules # Clear node_modules to ensure a fresh install
+      - rm -rf node_modules # Ensure node_modules is fresh
       - npm install
       - echo "Frontend dependencies installed"
 
       # Verify that react-scripts is installed
-      - echo "Checking if react-scripts is installed in frontend"
-      - if [ ! -f node_modules/.bin/react-scripts ]; then echo "react-scripts is missing. Re-installing frontend dependencies"; rm -rf node_modules; npm install; fi
+      - echo "Checking react-scripts installation"
+      - if [ -f node_modules/.bin/react-scripts ]; then echo "react-scripts found"; else echo "react-scripts missing"; fi
 
   build:
     commands:
       - echo "Building frontend"
       - npm run build
 
-      # Copy frontend build files to backend public folder (if needed)
+      # Copy build files to the backend directory (optional, if needed for deployment)
       - echo "Copying frontend build to backend public folder"
       - cp -r build ../backend/public
       - echo "Build and setup complete"
 
 artifacts:
   files:
-    - backend/**/* # Include everything in the backend folder
-  base-directory: backend # Base directory for artifacts
-  discard-paths: no # Preserve directory structure
+    - backend/**/*
+    - frontend/build/**/*
