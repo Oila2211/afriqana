@@ -1,5 +1,3 @@
 #!/bin/bash
-# Clean up any old files if needed
+# Ensure scripts are executable
 chmod +x scripts/*.sh
-rm -rf /home/ec2-user/afriqana/backend
-rm -rf /home/ec2-user/afriqana/frontend
