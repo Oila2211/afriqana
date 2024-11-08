@@ -25,12 +25,13 @@ phases:
       - echo "Building frontend"
       - npm run build
 
-      # Copy build files to the backend directory (optional, if needed for deployment)
+      # Copy build files to the backend directory
       - echo "Copying frontend build to backend public folder"
       - cp -r build ../backend/public
       - echo "Build and setup complete"
 
 artifacts:
   files:
-    - backend/**/*
-    - frontend/build/**/*
+    - backend/**/* # Include everything in the backend folder
+  base-directory: backend # Base directory for artifacts
+  discard-paths: no # Preserve directory structure
